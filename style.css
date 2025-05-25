@@ -134,4 +134,35 @@ height: 120px;
 float: left;
 margin-right: 10px;
 }
+.post-actions {
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+  padding-left: 10px;
+}
+
+.post-actions img {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.post-actions img:hover {
+  transform: scale(1.2);
+}
+
+.postelements h4 {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.postelements {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.postelements:hover {
+  background-color: #f0f0f0;
+}
 
