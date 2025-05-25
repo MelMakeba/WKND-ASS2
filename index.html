@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Twitter Clone</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <app-root ng-version="17.3.7">
+    <app-nav class="header"> 
+        <h1>Twitter Clone</h1>
+      <div id="user-select">
+        <label for="user-dropdown">Search:</label>
+        <select id="user-dropdown"></select>
+      </div>
+    </app-nav>
+    <app-user-profile>
+        <div class="user-content">
+            <img src="./assets/background.jpg" alt="background-clone">
+        </div>
+        <div class="profile">
+            <img src="./assets/screenshot-2022-05-24-at-15-22-28.png" alt="profile photo">
+            <div class="userinfo">
+              <h5>Leanne Graham</h5>
+            <p>@Bret</p>
+            <a href="hildegard.org">hildegard.org</a>
+            <p>Multilayered client server neural-net</p>
+            <div class="location">
+                <img src="./assets/location.png" alt="location image">
+                <p>Gwenborough</p>
+            </div>
+            </div>
+        </div>
+    </app-user-profile>
+   
+    <main>
+      <div class="posts">
+        <h1>Posts</h1>
+        <div id="post-list"></div>
+      </div>
+     <div class="comments">
+      <h1>Comments</h1>
+      <div id="comment-list"></div>
+     </div>
+    
+    </main>
+  </div>
+    </app-root>
+  <script src="app.js"></script>
+</body>
+</html>
