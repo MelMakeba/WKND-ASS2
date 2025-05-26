@@ -1,4 +1,3 @@
-// Define interfaces for API data types
 interface User {
   id: number;
   name: string;
@@ -43,26 +42,21 @@ interface ActionIcon {
   alt: string;
 }
 
-// Global variable to store current user data
 let currentUser: User | null = null;
 
-// DOM element references with proper type annotations
 const userDropdown = document.getElementById('user-dropdown') as HTMLSelectElement;
 const postList = document.getElementById('post-list') as HTMLDivElement;
 const commentList = document.getElementById('comment-list') as HTMLDivElement;
 
-// Fetching user information
 function renderUserInfo(userId: number): Promise<void> {
   return fetch(`https://jsonplaceholder.typicode.com/users/${userId}`)
     .then((response: Response) => response.json())
     .then((user: User) => {
-      // Store current user globally
       currentUser = user;
       
       const userInfoDiv = document.querySelector('.userinfo') as HTMLDivElement;
-      userInfoDiv.innerHTML = ''; // Clear previous content
+      userInfoDiv.innerHTML = ''; 
 
-      // Create profile elements
       const nameElement = document.createElement('h5');
       nameElement.textContent = user.name;
 
@@ -89,7 +83,6 @@ function renderUserInfo(userId: number): Promise<void> {
       locationDiv.appendChild(locationIcon);
       locationDiv.appendChild(locationText);
       
-      // Append all elements to the user info div
       userInfoDiv.appendChild(nameElement);
       userInfoDiv.appendChild(usernameElement);
       userInfoDiv.appendChild(websiteLink);
@@ -101,7 +94,6 @@ function renderUserInfo(userId: number): Promise<void> {
     .catch((error: Error) => console.error('Error fetching user info:', error));
 }
 
-// Fetch users and populate dropdown
 fetch('https://jsonplaceholder.typicode.com/users')
   .then((response: Response) => response.json())
   .then((users: User[]) => {
@@ -117,7 +109,6 @@ fetch('https://jsonplaceholder.typicode.com/users')
   .catch((error: Error) => console.error('Error fetching users:', error));
   
 function fetchPosts(userId: number): void {
-  // First fetch user info to ensure currentUser is updated
   renderUserInfo(userId)
     .then(() => {
       return fetch(`https://jsonplaceholder.typicode.com/posts?userId=${userId}`);
@@ -135,7 +126,6 @@ function fetchPosts(userId: number): void {
 function renderPosts(posts: Post[]): void {
   postList.innerHTML = '';
   
-  // Make sure we have user data
   if (!currentUser) {
     console.error('No user data available');
     return;
@@ -145,22 +135,19 @@ function renderPosts(posts: Post[]): void {
     const postElement = document.createElement('div');
     postElement.classList.add("postelements");
     
-    // Create post header with user info
     const imgdiv = document.createElement('div');
     imgdiv.className = 'imgdiv';
     
-    // User avatar
     const image = document.createElement('img');
-    image.src = './assets/screenshot-2022-05-24-at-15-22-28.png'; // Use local assets
+    image.src = './assets/screenshot-2022-05-24-at-15-22-28.png'; 
     image.alt = 'User avatar';
     
-    // User info with verified icon
     const userInfo = document.createElement('div');
     userInfo.className = 'icons';
     
     const userName = document.createElement('p');
     userName.className = 'paragraph';
-    userName.textContent = currentUser ? currentUser.name : 'Unknown User'; // Use current user name or fallback
+    userName.textContent = currentUser ? currentUser.name : 'Unknown User'; 
     
     const verifyIcon = document.createElement('img');
     verifyIcon.src = './assets/verify.png';
@@ -170,14 +157,13 @@ function renderPosts(posts: Post[]): void {
     twitterIcon.src = './assets/twitter.png';
     twitterIcon.alt = 'Twitter';
     
-    // Assemble post header
+    
     userInfo.appendChild(userName);
     userInfo.appendChild(verifyIcon);
     userInfo.appendChild(twitterIcon);
     imgdiv.appendChild(image);
     imgdiv.appendChild(userInfo);
     
-    // Post content
     const postContent = document.createElement('div');
     
     const postTitle = document.createElement('h4');
@@ -189,30 +175,35 @@ function renderPosts(posts: Post[]): void {
     postContent.appendChild(postTitle);
     postContent.appendChild(postBody);
     
-    // Post actions
     const postActions = document.createElement('div');
     postActions.className = 'post-actions';
     
-    // Add comment, retweet, and like icons
-    const actionIcons: ActionIcon[] = [
-      { src: './assets/message.png', alt: 'Comment' },
-      { src: './assets/retweet.png', alt: 'Retweet' },
-      { src: './assets/heart.png', alt: 'Like' }
+    const actionTypes = [
+      { src: './assets/message.png', alt: 'Comment', count: '200' },
+      { src: './assets/retweet.png', alt: 'Retweet', count: '200' },
+      { src: './assets/heart.png', alt: 'Like', count: '200' }
     ];
     
-    actionIcons.forEach((icon: ActionIcon) => {
+    actionTypes.forEach(action => {
+      const actionItem = document.createElement('div');
+      actionItem.className = 'action-item';
+      
       const iconImg = document.createElement('img');
-      iconImg.src = icon.src;
-      iconImg.alt = icon.alt;
-      postActions.appendChild(iconImg);
+      iconImg.src = action.src;
+      iconImg.alt = action.alt;
+      
+      const countSpan = document.createElement('span');
+      countSpan.textContent = action.count;
+      
+      actionItem.appendChild(iconImg);
+      actionItem.appendChild(countSpan);
+      postActions.appendChild(actionItem);
     });
     
-    // Assemble the post
     postElement.appendChild(imgdiv);
     postElement.appendChild(postContent);
     postElement.appendChild(postActions);
     
-    // Add click event to show comments
     postElement.addEventListener('click', () => fetchComments(post.id));
     postList.appendChild(postElement);
   });
@@ -221,18 +212,21 @@ function renderPosts(posts: Post[]): void {
 function fetchComments(postId: number): void {
   fetch(`https://jsonplaceholder.typicode.com/comments?postId=${postId}`)
     .then((response: Response) => response.json())
-    .then((comments: Comment[]) => renderComments(comments))
+    .then((comments: Comment[]) => renderComments(comments, postId))
     .catch((error: Error) => console.error('Error fetching comments:', error));
 }
 
-function renderComments(comments: Comment[]): void {
+function renderComments(comments: Comment[], postId: number): void {
   commentList.innerHTML = '';
   
-  // Make sure we have user data
   if (!currentUser) {
     console.error('No user data available');
     return;
   }
+  
+  const commentsHeading = document.createElement('h3');
+  commentsHeading.textContent = `Post ${postId} Comments (${comments.length})`;
+  commentList.appendChild(commentsHeading);
   
   comments.forEach((comment: Comment) => {
     const commentElement = document.createElement('div');
@@ -242,30 +236,45 @@ function renderComments(comments: Comment[]): void {
     imagediv.className = 'imagediv';
     
     const img = document.createElement('img');
-    img.src = './assets/screenshot-2022-05-24-at-15-22-28.png'; // Use local asset instead of remote URL
+    img.src = './assets/screenshot-2022-05-24-at-15-22-28.png'; 
     img.alt = '';
     
-    // Include user info in the comment
-    const commentHeader = document.createElement('div');
-    commentHeader.className = 'comment-header';
-    
-    const commentUserName = document.createElement('h5');
-    commentUserName.textContent = currentUser ? currentUser.name : 'Unknown User'; // Use current user name or fallback
-    
-    const commentUserEmail = document.createElement('small');
-    commentUserEmail.textContent = currentUser ? `@${currentUser.username}` : 'Unknown User';
-    commentUserEmail.style.color = '#657786';
     
     const param = document.createElement('p');
     param.className = 'paragraph2';
     param.textContent = comment.body;
     
+    
+    const commentActions = document.createElement('div');
+    commentActions.className = 'comment-actions';
+    
+    const commentActionTypes = [
+      { src: './assets/message.png', alt: 'Reply', count: '0' },
+      { src: './assets/retweet.png', alt: 'Retweet', count: '0' },
+      { src: './assets/heart.png', alt: 'Like', count: '0' }
+    ];
+    
+    commentActionTypes.forEach(action => {
+      const actionItem = document.createElement('div');
+      actionItem.className = 'action-item';
+      
+      const iconImg = document.createElement('img');
+      iconImg.src = action.src;
+      iconImg.alt = action.alt;
+      
+      const countSpan = document.createElement('span');
+      countSpan.textContent = action.count;
+      
+      actionItem.appendChild(iconImg);
+      actionItem.appendChild(countSpan);
+      commentActions.appendChild(actionItem);
+
+    });
+    
     imagediv.appendChild(img);
     commentElement.appendChild(imagediv);
-    commentElement.appendChild(commentUserName);
-    commentElement.appendChild(commentUserEmail);
     commentElement.appendChild(param);
-    
+    commentElement.appendChild(commentActions);
     commentList.appendChild(commentElement);
   });
 }
@@ -275,5 +284,4 @@ userDropdown.addEventListener('change', () => {
   fetchPosts(selectedUserId);
 });
 
-// Debug message to verify TypeScript is working
 console.log("TypeScript is successfully compiled and running!");
