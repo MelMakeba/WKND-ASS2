@@ -4,16 +4,8 @@ interface User {
   username: string;
   email: string;
   address: {
-    street: string;
-    suite: string;
     city: string;
-    zipcode: string;
-    geo: {
-      lat: string;
-      lng: string;
-    };
-  };
-  phone: string;
+      };
   website: string;
   company: {
     name: string;
@@ -33,7 +25,6 @@ interface Comment {
   postId: number;
   id: number;
   name: string;
-  email: string;
   body: string;
 }
 
@@ -100,7 +91,7 @@ fetch('https://jsonplaceholder.typicode.com/users')
     users.forEach((user: User) => {
       const option = document.createElement('option');
       option.value = user.id.toString();
-      option.textContent = user.username;
+      option.textContent = user.name;
       userDropdown.appendChild(option);
     });
     userDropdown.value = '1'; 
@@ -134,6 +125,7 @@ function renderPosts(posts: Post[]): void {
   posts.forEach((post: Post) => {
     const postElement = document.createElement('div');
     postElement.classList.add("postelements");
+    postElement.setAttribute('data-post-id', post.id.toString());
     
     const imgdiv = document.createElement('div');
     imgdiv.className = 'imgdiv';
@@ -212,8 +204,100 @@ function renderPosts(posts: Post[]): void {
 function fetchComments(postId: number): void {
   fetch(`https://jsonplaceholder.typicode.com/comments?postId=${postId}`)
     .then((response: Response) => response.json())
-    .then((comments: Comment[]) => renderComments(comments, postId))
+    .then((comments: Comment[]) => {
+      renderComments(comments, postId);
+      
+      renderInlineComments(comments, postId);
+    })
     .catch((error: Error) => console.error('Error fetching comments:', error));
+}
+
+function renderInlineComments(comments: Comment[], postId: number): void {
+  const isMobile = window.matchMedia("(max-width: 576px)").matches;
+  
+  if (!isMobile) return;
+  
+  const allPosts = document.querySelectorAll('.postelements');
+  allPosts.forEach(post => post.classList.remove('active'));
+  
+  const oldInlineComments = document.querySelectorAll('.post-inline-comments');
+  oldInlineComments.forEach(section => section.remove());
+  
+  const clickedPost = document.querySelector(`.postelements[data-post-id="${postId}"]`);
+  if (!clickedPost) return;
+  
+  clickedPost.classList.add('active');
+  
+  const inlineComments = document.createElement('div');
+  inlineComments.className = 'post-inline-comments active';
+  
+  const commentsHeading = document.createElement('h4');
+  commentsHeading.textContent = `Comments (${comments.length})`;
+  inlineComments.appendChild(commentsHeading);
+  
+  comments.forEach((comment: Comment) => {
+    const commentElement = document.createElement('div');
+    commentElement.classList.add("contents");
+    
+    const imagediv = document.createElement('div');
+    imagediv.className = 'imagediv';
+    
+    const img = document.createElement('img');
+    img.src = './assets/screenshot-2022-05-24-at-15-22-28.png';
+    img.alt = 'Avatar';
+    imagediv.appendChild(img);
+    
+    const commentName = document.createElement('h5');
+    commentName.textContent = comment.name;
+    
+    const commentBody = document.createElement('p');
+    commentBody.className = 'paragraph2';
+    commentBody.textContent = comment.body;
+    
+    const commentActions = document.createElement('div');
+    commentActions.className = 'comment-actions';
+    
+    const actionTypes = [
+      { src: './assets/message.png', alt: 'Reply', count: '0' },
+      { src: './assets/retweet.png', alt: 'Retweet', count: '0' },
+      { src: './assets/heart.png', alt: 'Like', count: '0' }
+    ];
+    
+    actionTypes.forEach(action => {
+      const actionItem = document.createElement('div');
+      actionItem.className = 'action-item';
+      
+      const iconImg = document.createElement('img');
+      iconImg.src = action.src;
+      iconImg.alt = action.alt;
+      
+      const countSpan = document.createElement('span');
+      countSpan.textContent = action.count;
+      
+      actionItem.appendChild(iconImg);
+      actionItem.appendChild(countSpan);
+      commentActions.appendChild(actionItem);
+    });
+    
+    commentElement.appendChild(imagediv);
+    commentElement.appendChild(commentName);
+    commentElement.appendChild(commentBody);
+    commentElement.appendChild(commentActions);
+    
+    inlineComments.appendChild(commentElement);
+  });
+  
+  const closeButton = document.createElement('button');
+  closeButton.textContent = 'Close';
+  closeButton.className = 'close-comments-btn';
+  closeButton.addEventListener('click', (e) => {
+    e.stopPropagation();
+    inlineComments.remove();
+    clickedPost.classList.remove('active');
+  });
+  
+  inlineComments.appendChild(closeButton);
+  clickedPost.after(inlineComments);
 }
 
 function renderComments(comments: Comment[], postId: number): void {
@@ -225,7 +309,7 @@ function renderComments(comments: Comment[], postId: number): void {
   }
   
   const commentsHeading = document.createElement('h3');
-  commentsHeading.textContent = `Post ${postId} Comments (${comments.length})`;
+  commentsHeading.textContent = `Post ${postId} Comments `;
   commentList.appendChild(commentsHeading);
   
   comments.forEach((comment: Comment) => {
